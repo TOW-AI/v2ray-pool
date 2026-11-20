@@ -1,0 +1,486 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "V2Ray Pool Engine Settings",
+  "type": "object",
+  "required": [
+    "app",
+    "collector",
+    "validator",
+    "tester",
+    "intelligence",
+    "ranking",
+    "subscription",
+    "api",
+    "history",
+    "scheduler"
+  ],
+  "properties": {
+    "app": {
+      "type": "object",
+      "required": [
+        "name",
+        "version",
+        "timezone",
+        "log_level"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string"
+        },
+        "timezone": {
+          "const": "UTC"
+        },
+        "log_level": {
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARNING",
+            "ERROR"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "collector": {
+      "type": "object",
+      "required": [
+        "request_timeout_seconds",
+        "max_response_bytes",
+        "max_redirects",
+        "max_concurrency",
+        "refresh_interval_seconds",
+        "sources"
+      ],
+      "properties": {
+        "request_timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 120
+        },
+        "max_response_bytes": {
+          "type": "integer",
+          "minimum": 1024,
+          "maximum": 10485760
+        },
+        "max_redirects": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "max_concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "refresh_interval_seconds": {
+          "type": "integer",
+          "minimum": 60
+        },
+        "user_agent": {
+          "type": "string"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "source.schema.json"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "validator": {
+      "type": "object",
+      "required": [
+        "allowed_protocols",
+        "tcp_timeout_seconds",
+        "denied_ports"
+      ],
+      "properties": {
+        "allowed_protocols": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "vless",
+              "vmess",
+              "trojan",
+              "ss"
+            ]
+          }
+        },
+        "block_private_destinations": {
+          "type": "boolean"
+        },
+        "block_link_local": {
+          "type": "boolean"
+        },
+        "block_loopback": {
+          "type": "boolean"
+        },
+        "block_multicast": {
+          "type": "boolean"
+        },
+        "block_reserved": {
+          "type": "boolean"
+        },
+        "tcp_timeout_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 15
+        },
+        "denied_ports": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          }
+        },
+        "require_public_ip": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "tester": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "xray_binary",
+        "xray_version",
+        "xray_sha256",
+        "process_timeout_seconds",
+        "ip_observers",
+        "min_successful_observers"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "xray_binary": {
+          "type": "string"
+        },
+        "xray_version": {
+          "type": "string"
+        },
+        "xray_sha256": {
+          "type": "string",
+          "pattern": "^$|^[a-fA-F0-9]{64}$"
+        },
+        "process_timeout_seconds": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 120
+        },
+        "startup_timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "max_parallel_configs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "enable_ipv4": {
+          "type": "boolean"
+        },
+        "enable_ipv6": {
+          "type": "boolean"
+        },
+        "ip_observers": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "response_format"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "url": {
+                "type": "string",
+                "pattern": "^https://"
+              },
+              "response_format": {
+                "enum": [
+                  "json",
+                  "text"
+                ]
+              },
+              "response_field": {
+                "type": "string"
+              },
+              "url_ipv4": {
+                "type": "string",
+                "pattern": "^https://"
+              },
+              "url_ipv6": {
+                "type": "string",
+                "pattern": "^https://"
+              }
+            },
+            "additionalProperties": false,
+            "anyOf": [
+              {
+                "required": [
+                  "url"
+                ]
+              },
+              {
+                "required": [
+                  "url_ipv4"
+                ]
+              },
+              {
+                "required": [
+                  "url_ipv6"
+                ]
+              }
+            ]
+          }
+        },
+        "min_successful_observers": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "observer_timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "throughput_enabled": {
+          "type": "boolean"
+        },
+        "throughput_url": {
+          "type": "string"
+        },
+        "throughput_max_bytes": {
+          "type": "integer",
+          "minimum": 1024
+        },
+        "throughput_timeout_seconds": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "intelligence": {
+      "type": "object",
+      "required": [
+        "fixed_candidate",
+        "fixed_verified",
+        "rotating",
+        "fixed_evidence_max_age_hours",
+        "required_ip_families"
+      ],
+      "properties": {
+        "fixed_candidate": {
+          "$ref": "#/$defs/threshold"
+        },
+        "fixed_verified": {
+          "$ref": "#/$defs/threshold"
+        },
+        "rotating": {
+          "type": "object",
+          "required": [
+            "min_distinct_ips",
+            "min_runs"
+          ],
+          "properties": {
+            "min_distinct_ips": {
+              "type": "integer",
+              "minimum": 2
+            },
+            "min_runs": {
+              "type": "integer",
+              "minimum": 2
+            }
+          }
+        },
+        "fixed_evidence_max_age_hours": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reverify_after_change": {
+          "type": "boolean"
+        },
+        "required_ip_families": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "ipv4",
+              "ipv6"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "ranking": {
+      "type": "object",
+      "required": [
+        "policy_version",
+        "max_metric_age_hours",
+        "minimum_score_coverage",
+        "fixed_weights",
+        "rotating_weights",
+        "balanced_weights"
+      ],
+      "properties": {
+        "policy_version": {
+          "type": "string"
+        },
+        "max_metric_age_hours": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minimum_score_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "fixed_weights": {
+          "$ref": "#/$defs/weights"
+        },
+        "rotating_weights": {
+          "$ref": "#/$defs/weights"
+        },
+        "balanced_weights": {
+          "$ref": "#/$defs/weights"
+        }
+      },
+      "additionalProperties": true
+    },
+    "subscription": {
+      "type": "object",
+      "required": [
+        "encoding",
+        "include_rotating_in_main",
+        "include_unstable_in_main",
+        "max_top_configs"
+      ],
+      "properties": {
+        "encoding": {
+          "enum": [
+            "base64",
+            "plain"
+          ]
+        },
+        "include_rotating_in_main": {
+          "type": "boolean"
+        },
+        "include_unstable_in_main": {
+          "type": "boolean"
+        },
+        "max_top_configs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        }
+      },
+      "additionalProperties": false
+    },
+    "api": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "publish_raw_uri"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string"
+        },
+        "publish_raw_uri": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "history": {
+      "type": "object",
+      "required": [
+        "daily_retention_days",
+        "weekly_retention_weeks",
+        "monthly_retention_months"
+      ],
+      "properties": {
+        "daily_retention_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "weekly_retention_weeks": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "monthly_retention_months": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "scheduler": {
+      "type": "object",
+      "required": [
+        "cron",
+        "concurrency_group"
+      ],
+      "properties": {
+        "cron": {
+          "type": "string"
+        },
+        "concurrency_group": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "publishing": {
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "threshold": {
+      "type": "object",
+      "required": [
+        "min_runs",
+        "min_span_hours"
+      ],
+      "properties": {
+        "min_runs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "min_span_hours": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "weights": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      }
+    }
+  },
+  "additionalProperties": false
+}

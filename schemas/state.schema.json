@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "V2Ray Pool State",
+  "type": "object",
+  "additionalProperties": true,
+  "anyOf": [
+    {
+      "required": [
+        "schema_version",
+        "records"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "records": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "config_id",
+              "protocol",
+              "status"
+            ],
+            "properties": {
+              "config_id": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              },
+              "protocol": {
+                "enum": [
+                  "vless",
+                  "vmess",
+                  "trojan",
+                  "ss"
+                ]
+              },
+              "status": {
+                "type": "string"
+              },
+              "public_redistribution": {
+                "type": "boolean"
+              },
+              "uri": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    {
+      "required": [
+        "schema_version",
+        "observations",
+        "transitions"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "observation_id",
+              "config_id",
+              "run_id",
+              "observed_at",
+              "ip_family",
+              "ip",
+              "observers",
+              "consensus",
+              "result_code"
+            ],
+            "properties": {
+              "observation_id": {
+                "type": "string"
+              },
+              "config_id": {
+                "type": "string"
+              },
+              "run_id": {
+                "type": "string"
+              },
+              "observed_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "ip_family": {
+                "enum": [
+                  "ipv4",
+                  "ipv6"
+                ]
+              },
+              "ip": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "observers": {
+                "type": "array"
+              },
+              "consensus": {
+                "type": "boolean"
+              },
+              "geo": {},
+              "result_code": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "config_id",
+              "from_status",
+              "to_status",
+              "changed_at",
+              "reason_codes"
+            ],
+            "properties": {
+              "config_id": {
+                "type": "string"
+              },
+              "from_status": {
+                "type": "string"
+              },
+              "to_status": {
+                "type": "string"
+              },
+              "changed_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "reason_codes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "required": [
+        "schema_version",
+        "records"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "records": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+name: Validate
+
+on:
+  push:
+    branches: [main, "feature/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install project and development tools
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+
+      - name: Run Ruff
+        run: ruff check engine scripts tests
+
+      - name: Run mypy advisory check
+        continue-on-error: true
+        run: mypy engine
+
+      - name: Run Bandit
+        run: bandit -q -r engine scripts -ll
+
+      - name: Compile Python files
+        run: python -m compileall -q engine scripts
+
+      - name: Run unit and integration tests
+        run: pytest --cov=engine --cov-report=term-missing
+
+      - name: Validate settings
+        run: python -m engine.cli validate-settings
+
+      - name: Build offline snapshot
+        run: python -m engine.cli run --offline --data-root data --output build/data
+
+      - name: Validate offline output
+        run: python -m engine.cli validate-output --data-root build/data
+
+      - name: Audit offline State
+        run: python -m engine.cli audit-state --data-root build/data
