@@ -43,12 +43,12 @@ def _validate_observer_url(url: str) -> None:
         raise ValueError("OBSERVER_URL_INVALID")
     try:
         address = ipaddress.ip_address(parsed.hostname)
-    except ValueError:
+    except ValueError as exc:
         hostname = parsed.hostname.lower().rstrip(".")
         if hostname in {"localhost", "localhost.localdomain"} or hostname.endswith(
             (".localhost", ".local", ".internal", ".lan")
         ):
-            raise ValueError("OBSERVER_URL_BLOCKED")
+            raise ValueError("OBSERVER_URL_BLOCKED") from exc
     else:
         if not address.is_global:
             raise ValueError("OBSERVER_URL_BLOCKED")

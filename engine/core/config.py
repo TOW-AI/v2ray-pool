@@ -34,12 +34,12 @@ def _validate_https_endpoint(url: str, label: str, allow_query: bool = True) -> 
         raise ConfigurationError(f"{label} must be a credential-free HTTPS URL on port 443.")
     try:
         address = ipaddress.ip_address(parsed.hostname)
-    except ValueError:
+    except ValueError as exc:
         hostname = parsed.hostname.lower().rstrip(".")
         if hostname in {"localhost", "localhost.localdomain"} or hostname.endswith(
             (".localhost", ".local", ".internal", ".lan")
         ):
-            raise ConfigurationError(f"{label} must not target a local host.")
+            raise ConfigurationError(f"{label} must not target a local host.") from exc
     else:
         if not address.is_global:
             raise ConfigurationError(f"{label} must not target a non-public IP address.")

@@ -109,7 +109,7 @@ def _classify_family(
 
     run_evidence: list[dict] = []
     conflicting_runs: list[dict] = []
-    for run_id, run_items in by_run.items():
+    for run_items in by_run.values():
         ips = {str(item["ip"]) for item in run_items}
         newest = max(run_items, key=lambda item: parse_time(item["observed_at"]) or now)
         if len(ips) != 1:

@@ -42,9 +42,6 @@ def append_run_history(
 ) -> None:
     stamp = run_time.astimezone(UTC)
     day_key = stamp.strftime("%Y-%m-%d")
-    iso_year, iso_week, _ = stamp.isocalendar()
-    week_key = f"{iso_year}-W{iso_week:02d}"
-    month_key = stamp.strftime("%Y-%m")
     daily = {key: list(value) for key, value in existing.get("daily", {}).items()}
     daily.setdefault(day_key, [])
     if not any(item.get("run_id") == run_summary["run_id"] for item in daily[day_key]):

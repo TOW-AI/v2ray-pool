@@ -47,9 +47,9 @@ def decode_file(path, encoding="base64"):
 
 def test_subscriptions_exclude_private_and_unpublishable_records(tmp_path):
     fixed_uri = f"vless://{UUID}@one.example:443#fixed"
-    rotating_uri = f"trojan://password@two.example:443#rotating"
+    rotating_uri = "trojan://password@two.example:443#rotating"
     private_uri = f"vless://{UUID}@private.example:443#private"
-    invalid_uri = f"ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTpwYXNzQGV4YW1wbGUuY29tOjgzODg=#invalid"
+    invalid_uri = "ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTpwYXNzQGV4YW1wbGUuY29tOjgzODg=#invalid"
     configs = {
         parse_uri(fixed_uri).config_id: record(fixed_uri, "FIXED_VERIFIED", True, "US"),
         parse_uri(rotating_uri).config_id: record(rotating_uri, "ROTATING", True),
@@ -109,7 +109,7 @@ def test_rankings_exclude_unapproved_configs():
 
 def test_static_api_filters_private_and_reports_run_success_correctly(tmp_path):
     public_uri = f"vless://{UUID}@public.example:443"
-    private_uri = f"trojan://password@private.example:443"
+    private_uri = "trojan://password@private.example:443"
     public = record(public_uri, "FIXED_VERIFIED", True)
     private = record(private_uri, "FIXED_VERIFIED", False)
     configs = {public["config_id"]: public, private["config_id"]: private}
