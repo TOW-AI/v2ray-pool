@@ -33,6 +33,7 @@ include = ["engine*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 addopts = "-q --strict-markers"
 
 [tool.ruff]
