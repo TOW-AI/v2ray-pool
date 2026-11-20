@@ -1,0 +1,151 @@
+name: Update data
+
+on:
+  schedule:
+    - cron: "17 */4 * * *"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Maximum configurations to test in this run.
+        required: false
+        type: number
+        default: 100
+      count_as_scheduled:
+        description: Include this manual run in the scheduled uptime estimate.
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v2ray-pool-data-publish
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    permissions:
+      contents: read
+    outputs:
+      data_commit: ${{ steps.data_revision.outputs.commit }}
+    steps:
+      - name: Check out engine source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: engine-source
+          persist-credentials: false
+
+      - name: Check out data branch
+        uses: actions/checkout@v4
+        with:
+          ref: data
+          path: data-source
+          persist-credentials: false
+
+      - name: Record data parent commit
+        id: data_revision
+        working-directory: data-source
+        run: echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install project
+        working-directory: engine-source
+        run: python -m pip install --upgrade pip && python -m pip install .
+
+      - name: Validate configuration
+        working-directory: engine-source
+        run: python -m engine.cli validate-settings
+
+      - name: Audit source State
+        working-directory: engine-source
+        run: python -m engine.cli audit-state --data-root ../data-source
+
+      - name: Build production snapshot
+        working-directory: engine-source
+        env:
+          DATA_COMMIT: ${{ steps.data_revision.outputs.commit }}
+          CONFIG_LIMIT: ${{ inputs.limit }}
+          COUNT_AS_SCHEDULED: ${{ github.event_name == 'schedule' || inputs.count_as_scheduled }}
+        run: |
+          set -euo pipefail
+          args=(--settings config/settings.yml --sources config/sources.yml --data-root ../data-source --output build/data)
+          if [[ -n "${CONFIG_LIMIT}" ]]; then args+=(--limit "${CONFIG_LIMIT}"); fi
+          if [[ "${COUNT_AS_SCHEDULED}" == "true" ]]; then args+=(--scheduled); fi
+          python -m engine.cli run "${args[@]}"
+
+      - name: Require a real successful Xray test
+        working-directory: engine-source
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("build/reports/last-run.json").read_text(encoding="utf-8"))
+          if report.get("production_ready") is not True:
+              raise SystemExit("Production gate failed. A real successful Xray test is required.")
+          if report.get("quality", {}).get("quality_gate") != "passed":
+              raise SystemExit("Output quality gate did not pass.")
+          PY
+
+      - name: Upload validated snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-snapshot
+          path: engine-source/build/
+          if-no-files-found: error
+          retention-days: 3
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Check out engine source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: engine-source
+          persist-credentials: false
+
+      - name: Check out data branch
+        uses: actions/checkout@v4
+        with:
+          ref: data
+          path: data-repo
+          persist-credentials: true
+
+      - name: Download validated snapshot
+        uses: actions/download-artifact@v4
+        with:
+          name: data-snapshot
+          path: artifacts
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate downloaded snapshot
+        working-directory: engine-source
+        run: python -m engine.cli validate-output --settings config/settings.yml --data-root ../artifacts/data
+
+      - name: Publish without force push
+        env:
+          EXPECTED_DATA_COMMIT: ${{ needs.build.outputs.data_commit }}
+        run: |
+          set -euo pipefail
+          python engine-source/scripts/publish_data.py \
+            --source artifacts/data \
+            --repo data-repo \
+            --branch data \
+            --expected-parent "${EXPECTED_DATA_COMMIT}"

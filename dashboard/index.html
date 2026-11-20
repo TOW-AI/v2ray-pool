@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="V2Ray Pool Intelligence Engine status and performance dashboard.">
+  <title>V2Ray Pool Intelligence Engine</title>
+  <link rel="stylesheet" href="assets/dashboard.css">
+</head>
+<body>
+  <header class="site-header">
+    <div>
+      <p class="eyebrow">TOW-AI / NETWORK INTELLIGENCE</p>
+      <h1>V2Ray Pool Intelligence Engine</h1>
+      <p class="subtitle">Verified egress evidence, service health, and measured performance.</p>
+    </div>
+    <div class="header-meta">
+      <span id="system-state" class="state-pill state-unknown">Loading</span>
+      <span id="generated-at" class="meta-text">No data loaded</span>
+      <button id="refresh-button" type="button">Refresh data</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="error-panel" class="notice notice-error" role="alert" hidden></div>
+    <div id="stale-panel" class="notice notice-warning" role="status" hidden></div>
+
+    <section aria-labelledby="overview-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">01 / SYSTEM</p><h2 id="overview-title">Overview</h2></div>
+        <p class="section-note">Data from the last completed pipeline run.</p>
+      </div>
+      <div id="summary-cards" class="summary-grid" aria-live="polite">
+        <article class="metric-card"><span>Discovered</span><strong>—</strong></article>
+        <article class="metric-card"><span>Validated</span><strong>—</strong></article>
+        <article class="metric-card"><span>Fixed verified</span><strong>—</strong></article>
+        <article class="metric-card"><span>Rotating</span><strong>—</strong></article>
+        <article class="metric-card"><span>Publishable</span><strong>—</strong></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="status-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">02 / CLASSIFICATION</p><h2 id="status-title">Configuration status</h2></div>
+      </div>
+      <div id="status-breakdown" class="status-grid"></div>
+    </section>
+
+    <section aria-labelledby="performance-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">03 / PERFORMANCE</p><h2 id="performance-title">Measured rankings</h2></div>
+        <p class="section-note">The system does not show values that it did not measure.</p>
+      </div>
+      <div class="ranking-grid">
+        <article class="panel"><h3>Fastest</h3><ol id="fastest-list" class="ranking-list"><li>No measured data</li></ol></article>
+        <article class="panel"><h3>Balanced</h3><ol id="balanced-list" class="ranking-list"><li>No measured data</li></ol></article>
+        <article class="panel"><h3>Fixed</h3><ol id="fixed-list" class="ranking-list"><li>No verified data</li></ol></article>
+        <article class="panel"><h3>Rotating</h3><ol id="rotating-list" class="ranking-list"><li>No verified data</li></ol></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="intelligence-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">04 / IP INTELLIGENCE</p><h2 id="intelligence-title">Egress evidence</h2></div>
+        <p class="section-note">IPv4 and IPv6 evidence is independent.</p>
+      </div>
+      <div class="ranking-grid">
+        <article class="panel"><h3>Fixed evidence</h3><ul id="fixed-evidence-list" class="ranking-list"><li>No verified evidence</li></ul></article>
+        <article class="panel"><h3>Rotating changes</h3><ul id="rotating-evidence-list" class="ranking-list"><li>No verified IP changes</li></ul></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="geography-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">05 / DISTRIBUTION</p><h2 id="geography-title">Geography and protocols</h2></div>
+        <p class="section-note">Country values require a verified egress IP and a GeoIP database.</p>
+      </div>
+      <div class="ranking-grid">
+        <article class="panel"><h3>Countries</h3><ul id="country-list" class="ranking-list"><li>No GeoIP data</li></ul></article>
+        <article class="panel"><h3>Protocols</h3><ul id="protocol-list" class="ranking-list"><li>No protocol data</li></ul></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="configs-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">06 / INVENTORY</p><h2 id="configs-title">Published configurations</h2></div>
+      </div>
+      <div class="filters panel">
+        <label>Protocol
+          <select id="protocol-filter"><option value="">All protocols</option><option>vless</option><option>vmess</option><option>trojan</option><option>ss</option></select>
+        </label>
+        <label>Status
+          <select id="status-filter"><option value="">All published states</option><option>FIXED_VERIFIED</option><option>FIXED_CANDIDATE</option><option>ROTATING</option></select>
+        </label>
+        <label>Country
+          <select id="country-filter"><option value="">All countries</option></select>
+        </label>
+        <label>Search ID
+          <input id="search-filter" type="search" placeholder="Search config ID" autocomplete="off">
+        </label>
+      </div>
+      <div class="table-wrap panel">
+        <table>
+          <thead><tr><th>Config ID</th><th>Protocol</th><th>Status</th><th>Egress IP</th><th>Latency</th><th>Last test</th></tr></thead>
+          <tbody id="config-table"><tr><td colspan="6">No published configurations.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="system-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">07 / OPERATIONS</p><h2 id="system-title">System health</h2></div>
+      </div>
+      <div id="health-panel" class="panel health-panel">No system data loaded.</div>
+    </section>
+  </main>
+
+  <footer>
+    <span>V2Ray Pool Intelligence Engine 2.0</span>
+    <span>All timestamps use UTC. Unknown values stay unknown.</span>
+  </footer>
+  <script src="config.js"></script>
+  <script src="assets/dashboard.js" defer></script>
+</body>
+</html>

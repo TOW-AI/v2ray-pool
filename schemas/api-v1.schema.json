@@ -1,0 +1,645 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tow-ai.example/schemas/api-v1.schema.json",
+  "title": "V2Ray Pool Static API v1",
+  "$defs": {
+    "base": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "generated_at",
+        "run_id",
+        "source_commit",
+        "data_commit",
+        "data_age_seconds"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_commit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "data_commit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "data_age_seconds": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "status": {
+      "enum": [
+        "DISCOVERED",
+        "VALIDATED",
+        "TESTED",
+        "FIXED_CANDIDATE",
+        "FIXED_VERIFIED",
+        "ROTATING",
+        "UNSTABLE",
+        "IP_UNVERIFIED",
+        "QUARANTINED",
+        "EXPIRED",
+        "INVALID"
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "run_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "observer_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "first_observed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "last_observed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "span_hours": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "distinct_ips": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "change_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "last_ip_change_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "config": {
+      "type": "object",
+      "required": [
+        "config_id",
+        "protocol",
+        "status",
+        "verification_level",
+        "ip_status",
+        "ip_evidence",
+        "egress_ip",
+        "ip_family",
+        "country_code",
+        "country_name",
+        "last_test_at",
+        "metrics",
+        "scores",
+        "score_coverage",
+        "classification_reason_codes"
+      ],
+      "properties": {
+        "config_id": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "protocol": {
+          "enum": [
+            "vless",
+            "vmess",
+            "trojan",
+            "ss"
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "verification_level": {
+          "$ref": "#/$defs/status"
+        },
+        "ip_status": {
+          "type": "object",
+          "required": [
+            "ipv4",
+            "ipv6",
+            "overall"
+          ],
+          "properties": {
+            "ipv4": {
+              "$ref": "#/$defs/status"
+            },
+            "ipv6": {
+              "$ref": "#/$defs/status"
+            },
+            "overall": {
+              "$ref": "#/$defs/status"
+            }
+          },
+          "additionalProperties": false
+        },
+        "ip_evidence": {
+          "type": "object",
+          "required": [
+            "ipv4",
+            "ipv6"
+          ],
+          "properties": {
+            "ipv4": {
+              "$ref": "#/$defs/evidence"
+            },
+            "ipv6": {
+              "$ref": "#/$defs/evidence"
+            }
+          },
+          "additionalProperties": false
+        },
+        "egress_ip": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ip_family": {
+          "enum": [
+            "ipv4",
+            "ipv6",
+            null
+          ]
+        },
+        "country_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "country_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_test_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "metrics": {
+          "type": "object",
+          "required": [
+            "latency_ms",
+            "throughput_bps",
+            "unit_latency",
+            "unit_throughput",
+            "measured_at",
+            "measurement_method"
+          ],
+          "properties": {
+            "latency_ms": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "throughput_bps": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "unit_latency": {
+              "const": "ms"
+            },
+            "unit_throughput": {
+              "const": "bit/s"
+            },
+            "measured_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time"
+            },
+            "measurement_method": {
+              "type": [
+                "object",
+                "string",
+                "null"
+              ]
+            }
+          },
+          "additionalProperties": true
+        },
+        "scores": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "score_coverage": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "classification_reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "uri": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ranked_score": {
+      "type": "object",
+      "required": [
+        "rank",
+        "config_id",
+        "score",
+        "score_components",
+        "score_coverage",
+        "measured_at"
+      ],
+      "properties": {
+        "rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "config_id": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "score": {
+          "type": "number"
+        },
+        "score_components": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "score_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "measured_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ranked_latency": {
+      "type": "object",
+      "required": [
+        "rank",
+        "config_id",
+        "latency_ms",
+        "unit",
+        "measured_at"
+      ],
+      "properties": {
+        "rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "config_id": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "latency_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "unit": {
+          "const": "ms"
+        },
+        "measured_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "stats": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "totals",
+            "statuses",
+            "protocols",
+            "countries",
+            "tests",
+            "freshness"
+          ],
+          "properties": {
+            "totals": {
+              "type": "object",
+              "required": [
+                "discovered",
+                "validated",
+                "tested",
+                "publishable"
+              ],
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "statuses": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "protocols": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "countries": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "tests": {
+              "type": "object",
+              "required": [
+                "successful",
+                "failed",
+                "skipped"
+              ],
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "freshness": {
+              "type": "object",
+              "required": [
+                "last_successful_run_at",
+                "oldest_published_measurement_at"
+              ],
+              "properties": {
+                "last_successful_run_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
+                "oldest_published_measurement_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "config_list": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "configs"
+          ],
+          "properties": {
+            "configs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/config"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "rotating": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "configs",
+            "distinct_ip_count",
+            "ip_changes"
+          ],
+          "properties": {
+            "configs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/config"
+              }
+            },
+            "distinct_ip_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "ip_changes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "config_id",
+                  "ipv4",
+                  "ipv6"
+                ],
+                "properties": {
+                  "config_id": {
+                    "type": "string"
+                  },
+                  "ipv4": {
+                    "$ref": "#/$defs/evidence"
+                  },
+                  "ipv6": {
+                    "$ref": "#/$defs/evidence"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "countries": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "countries",
+            "unknown_count"
+          ],
+          "properties": {
+            "countries": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "country_code",
+                  "config_count",
+                  "fixed_verified",
+                  "rotating",
+                  "last_geoip_update"
+                ],
+                "properties": {
+                  "country_code": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{2}$"
+                  },
+                  "config_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "fixed_verified": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "rotating": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "last_geoip_update": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  }
+                }
+              }
+            },
+            "unknown_count": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      ]
+    },
+    "rankings": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        },
+        {
+          "type": "object",
+          "required": [
+            "ranking_policy_version",
+            "fixed",
+            "rotating",
+            "fastest",
+            "balanced"
+          ],
+          "properties": {
+            "ranking_policy_version": {
+              "type": "string"
+            },
+            "fixed": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ranked_score"
+              }
+            },
+            "rotating": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ranked_score"
+              }
+            },
+            "fastest": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ranked_latency"
+              }
+            },
+            "balanced": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ranked_score"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "type": "object"
+}
