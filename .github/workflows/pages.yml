@@ -18,31 +18,48 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Check out main source
+      - name: Check out repository
         uses: actions/checkout@v4
         with:
           ref: main
-          path: engine-source
-          persist-credentials: false
-
-      - name: Check out public data branch
-        uses: actions/checkout@v4
-        with:
-          ref: data
-          path: data-source
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Build static site
+      - name: Build dashboard and API directory
+        shell: bash
         run: |
           set -euo pipefail
           mkdir -p site/data/api/v1
-          cp -R engine-source/dashboard/. site/
-          if [[ -d data-source/api/v1 ]]; then
-            cp -R data-source/api/v1/. site/data/api/v1/
+          cp -R dashboard/. site/
+
+          # The data branch is created by the owner after production prerequisites
+          # pass. Until then, publish valid empty API documents so the UI can load
+          # and report an empty state instead of failing every fetch.
+          if git ls-remote --exit-code origin refs/heads/data >/dev/null 2>&1; then
+            git fetch --no-tags --depth=1 origin refs/heads/data
+            if git cat-file -e FETCH_HEAD:api/v1/stats.json 2>/dev/null; then
+              git archive FETCH_HEAD api/v1 | tar -x -C site/data
+            fi
           fi
+
+          api_dir=site/data/api/v1
+          if [[ ! -s "$api_dir/stats.json" ]]; then
+            cat > "$api_dir/stats.json" <<'JSON'
+          {"run_id":null,"generated_at":null,"data_age_seconds":null,"totals":{"discovered":0,"validated":0,"publishable":0},"statuses":{},"protocols":{},"tests":{"successful":0,"failed":0,"skipped":0}}
+          JSON
+          fi
+          if [[ ! -s "$api_dir/configs.json" ]]; then
+            printf '%s\n' '{"configs":[]}' > "$api_dir/configs.json"
+          fi
+          if [[ ! -s "$api_dir/rankings.json" ]]; then
+            printf '%s\n' '{"fixed":[],"rotating":[],"fastest":[],"balanced":[]}' > "$api_dir/rankings.json"
+          fi
+          if [[ ! -s "$api_dir/countries.json" ]]; then
+            printf '%s\n' '{"countries":[],"unknown_count":0}' > "$api_dir/countries.json"
+          fi
+          touch site/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
