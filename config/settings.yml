@@ -25,37 +25,10 @@ validator:
   require_public_ip: true
 
 tester:
-  enabled: false
-  xray_binary: ""
+  enabled: true
+  xray_binary: .runtime/xray/xray
   xray_version: v26.10.31
-  xray_sha256: ""
-  process_timeout_seconds: 25
-  startup_timeout_seconds: 5
-  max_parallel_configs: 2
-  max_configs_per_run: 100
-  enable_ipv4: true
-  enable_ipv6: true
-  ip_observers:
-    - id: ipify
-      url_ipv4: https://api.ipify.org?format=json
-      url_ipv6: https://api6.ipify.org?format=json
-      response_format: json
-      response_field: ip
-    - id: icanhazip
-      url_ipv4: https://ipv4.icanhazip.com/
-      url_ipv6: https://ipv6.icanhazip.com/
-      response_format: text
-      response_field: ""
-    - id: ifconfig_me
-      url: https://ifconfig.me/ip
-      response_format: text
-      response_field: ""
-  min_successful_observers: 2
-  observer_timeout_seconds: 8
-  throughput_enabled: false
-  throughput_url: ""
-  throughput_max_bytes: 1048576
-  throughput_timeout_seconds: 10
+  xray_sha256: "cc4b84d3069569f297a61f04b914f2bb37e9d202fd7b84cb50def1fc30fd40e1"
 
 intelligence:
   fixed_candidate:
