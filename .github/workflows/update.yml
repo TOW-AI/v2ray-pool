@@ -39,6 +39,13 @@ jobs:
           path: engine-source
           persist-credentials: false
 
+      - name: Install pinned Xray
+        working-directory: engine-source
+        env:
+          XRAY_VERSION: v26.10.31
+          XRAY_ARCHIVE_SHA256: e4bd9119f50ae7c41658b1abd0679ae06f98bd864a2907ff33f2f2cf7081b214
+        run: bash scripts/install_xray.sh
+
       - name: Check out data branch
         uses: actions/checkout@v4
         with:
