@@ -1,3 +1,43 @@
 # Add only sources that allow public redistribution.
 # Keep source credentials in environment secrets. Do not add tokens to this file.
-sources: []
+sources:
+  - source_id: radikal-verified
+    url: https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/verified/configs.txt
+    format: plain
+    enabled: true
+    priority: 10
+    timeout_seconds: 20
+    max_bytes: 2097152
+    max_redirects: 3
+    trust_level: normal
+    public_redistribution: true
+  - source_id: radikal-fast
+    url: https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/fast/configs.txt
+    format: plain
+    enabled: true
+    priority: 20
+    timeout_seconds: 20
+    max_bytes: 2097152
+    max_redirects: 3
+    trust_level: normal
+    public_redistribution: true
+  - source_id: nyein-all
+    url: https://raw.githubusercontent.com/nyeinkokoaung404/V2ray-Configs/main/All_Configs_Sub.txt
+    format: plain
+    enabled: true
+    priority: 30
+    timeout_seconds: 30
+    max_bytes: 4194304
+    max_redirects: 3
+    trust_level: normal
+    public_redistribution: true
+  - source_id: mahan-mix
+    url: https://raw.githubusercontent.com/MahanKenway/Freedom-V2Ray/main/configs/mix.txt
+    format: plain
+    enabled: true
+    priority: 40
+    timeout_seconds: 20
+    max_bytes: 2097152
+    max_redirects: 3
+    trust_level: normal
+    public_redistribution: true
